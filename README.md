@@ -2,11 +2,11 @@
 
 Приложение: https://github.com/express42/search_engine_ui/
 
-##Подготовка инфраструктуры
+## Подготовка инфраструктуры
 
 Платформа: GCP, 2 GKE кластера - инфраструктурный и кластер для приложения.
 
-#####Установка gitlab: 
+##### Установка gitlab: 
 - Добавить зону se-engine.tk в Cloud DNS (автоматизирую)
 
 - Проиницилизировать gloud: 
@@ -18,14 +18,14 @@
  infra/gke-gitlab-install.sh
 ```
 
-#####Установка кластера для приложения:
+##### Установка кластера для приложения:
 
 - Запустить скрипт настройки кластера:
 ```
  infra/gke-se-install.sh
 ```
 
-##Подготовка CI/CD
+## Подготовка CI/CD
 - Добавить в hosts:
 ```
 echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.se-project.tk"
@@ -63,7 +63,7 @@ git push origin master
 
 - Добавить кластер Kubernetes в Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html 
 
-##Планы:
+## Планы:
 - Добавить мониторинг и логирование
 - Добавить тестирование
 - Перделать Review (генерация правильных ссылок)
