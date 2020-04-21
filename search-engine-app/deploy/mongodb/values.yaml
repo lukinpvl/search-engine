@@ -1,0 +1,10 @@
+---
+service:
+  internalPort: 27017
+  externalPort: 27017
+
+image:
+  repository: mongo
+  tag: latest
+
+

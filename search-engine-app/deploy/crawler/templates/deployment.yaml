@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  labels:
+    app: search-engine
+    component: crawler
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-engine
+      component: crawler
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      name: crawler
+      labels:
+        app: search-engine
+        component: crawler
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        name: crawler
+        env:
+        - name: MONGO
+          value: {{ .Values.databaseHost | default (printf "%s-mongodb" .Release.Name) }}
+        - name: MONGO_PORT
+          value: {{ .Values.databaseHost | default "27017" | quote }}
+        - name: RMQ_HOST
+          value: {{ .Values.databaseHost | default (printf "%s-rabbitmq" .Release.Name) }}
+        - name: RMQ_QUEUE
+          value: {{ .Values.databaseHost | default "rmq_queue" | quote }}
+        - name: RMQ_USERNAME
+          value: {{ .Values.databaseHost | default "guest" | quote }}
+        - name: RMQ_PASSWORD
+          value: {{ .Values.databaseHost | default "guest" | quote }}
+        - name: CHECK_INTERVAL
+          value: {{ .Values.databaseHost | default "180" | quote }}
+        - name: EXCLUDE_URLS
+          value: {{ .Values.databaseHost | default ".*github.com" | quote }}
+        - name: URL
+          value: {{ .Values.databaseHost | default "https://vitkhab.github.io/search_engine_test_site/" | quote }}
+          
+
