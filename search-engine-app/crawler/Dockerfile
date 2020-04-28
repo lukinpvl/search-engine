@@ -18,5 +18,4 @@ ENV CHECK_INTERVAL 60
 ENV EXCLUDE_URLS '.*github.com'
 ENV URL 'https://vitkhab.github.io/search_engine_test_site/'
 
-#ENTRYPOINT ["python3", "crawler/crawler.py", "$URL"]
-ENTRYPOINT python3 crawler/crawler.py $URL
+CMD python3 crawler/crawler.py $URL

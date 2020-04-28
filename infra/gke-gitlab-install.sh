@@ -1,10 +1,13 @@
 #!/bin/sh
 
+set -e
+
 export PROJECT=search-engine-273811
 export REGION=europe-west1
 export MACHINE_TYPE=n1-standard-2
 export NUM_NODES=2
 export USE_STATIC_IP=true
+export DOMAIN=se-project.tk
 
 cd gitlab/
 
@@ -13,10 +16,11 @@ echo "gitlab/gke_bootstrap_script.sh up"
 ./gke_bootstrap_script.sh up
 sleep 60
 
-#Добавить создание зоны. Вынести в переменную
-gcloud dns record-sets transaction start --zone=se-project-tk
-gcloud dns record-sets transaction add $(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') --name=gitlab.se-project.tk. --ttl=300 --type=A --zone=se-project-tk
-gcloud dns record-sets transaction execute --zone=se-project-tk
+#echo "Creating dns (CloudDNS) zone and Gitlab records"
+#gcloud dns managed-zones create se-project-zone --description= --dns-name=$DOMAIN.
+#gcloud dns record-sets transaction start --zone=se-project-tk
+#gcloud dns record-sets transaction add $(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') --name=gitlab.$DOMAIN. --ttl=300 --type=A --zone=se-project-zone
+#gcloud dns record-sets transaction execute --zone=se-project-zone
 
 echo "Cluster deployed, installing gitlab chart..."
 
@@ -29,8 +33,8 @@ echo "helm3 upgrade --install -f gitlab/values-gke-minimum.yaml gitlab gitlab/gi
 helm3 upgrade --install -f values-gke-minimum.yaml gitlab gitlab/gitlab \
   --timeout 5m \
   --set global.edition=ce \
-  --set global.hosts.domain=se-project.tk \
-  --set certmanager-issuer.email=me@se-project.tk \
+  --set global.hosts.domain=$DOMAIN \
+  --set certmanager-issuer.email=me@$DOMAIN \
   --set global.hosts.externalIP=$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') \
   --set gitlab-runner.runners.privileged=true
     # Run all containers with the privileged flag enabled

@@ -29,10 +29,10 @@ dependencies:
     version: 1.0.0
     repository: "file://../mongodb"
 
-  - name: crawler
+  - name: search-engine-crawler
     version: 1.0.0
     repository: "file://../crawler"
 
-  - name: ui
+  - name: search-engine-ui
     version: 1.0.0
     repository: "file://../ui"

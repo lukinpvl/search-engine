@@ -15,4 +15,4 @@ ENV FLASK_APP ui.py
 
 EXPOSE 8000
 
-ENTRYPOINT gunicorn ui:app -b 0.0.0.0
+CMD gunicorn ui:app -b 0.0.0.0

@@ -5,11 +5,11 @@ dependencies:
 - name: mongodb
   repository: file://../mongodb
   version: 1.0.0
-- name: crawler
+- name: search-engine-crawler
   repository: file://../crawler
   version: 1.0.0
-- name: ui
+- name: search-engine-ui
   repository: file://../ui
   version: 1.0.0
-digest: sha256:0dc3c90900d0c0ece1303b505e56bf3c6bcbae576151901441a1613f5c5b31bf
-generated: "2020-04-18T16:14:49.575572828Z"
+digest: sha256:f65a63176c6ef665b496de6516a93ccfc19dbd99bb4119455ec14588d77ba44a
+generated: "2020-04-23T14:01:45.104756631Z"

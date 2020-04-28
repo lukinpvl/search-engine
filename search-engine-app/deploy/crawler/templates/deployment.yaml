@@ -39,7 +39,7 @@ spec:
         - name: RMQ_PASSWORD
           value: {{ .Values.databaseHost | default "guest" | quote }}
         - name: CHECK_INTERVAL
-          value: {{ .Values.databaseHost | default "180" | quote }}
+          value: {{ .Values.databaseHost | default "600" | quote }}
         - name: EXCLUDE_URLS
           value: {{ .Values.databaseHost | default ".*github.com" | quote }}
         - name: URL

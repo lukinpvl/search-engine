@@ -3,6 +3,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "ui.fullname" . }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
 spec:
   rules:
   - host: {{ .Values.ingress.host | default .Release.Name }}
@@ -12,4 +14,3 @@ spec:
         backend:
           serviceName: {{ template "ui.fullname" . }}
           servicePort: {{ .Values.service.externalPort }}
-
