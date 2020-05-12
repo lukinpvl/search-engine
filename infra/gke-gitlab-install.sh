@@ -2,7 +2,7 @@
 
 set -e
 
-export PROJECT=search-engine-273811
+export PROJECT=otus-microservices
 export REGION=europe-west1
 export MACHINE_TYPE=n1-standard-2
 export NUM_NODES=2
@@ -17,20 +17,22 @@ echo "gitlab/gke_bootstrap_script.sh up"
 sleep 60
 
 #echo "Creating dns (CloudDNS) zone and Gitlab records"
-#gcloud dns managed-zones create se-project-zone --description= --dns-name=$DOMAIN.
-#gcloud dns record-sets transaction start --zone=se-project-tk
-#gcloud dns record-sets transaction add $(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') --name=gitlab.$DOMAIN. --ttl=300 --type=A --zone=se-project-zone
-#gcloud dns record-sets transaction execute --zone=se-project-zone
+
+gcloud dns managed-zones list | grep se-project-zone || gcloud dns managed-zones create se-project-zone --description= --dns-name=$DOMAIN.
+sleep 60
+gcloud dns record-sets transaction start --zone=se-project-zone
+gcloud dns record-sets list --zone=se-project-zone | grep gitlab.$DOMAIN || gcloud dns record-sets transaction add $(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') --name=gitlab.$DOMAIN. --ttl=300 --type=A --zone=se-project-zone
+gcloud dns record-sets transaction execute --zone=se-project-zone
 
 echo "Cluster deployed, installing gitlab chart..."
 
 
-helm3 repo add gitlab https://charts.gitlab.io/
-helm3 repo update
+helm repo add gitlab https://charts.gitlab.io/
+helm repo update
 
-echo "helm3 upgrade --install -f gitlab/values-gke-minimum.yaml gitlab gitlab/gitlab   --timeout 5m   --set global.edition=ce   --set global.hosts.domain=example.com   --set global.hosts.externalIP=$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}')   --set certmanager-issuer.email=me@example.com   --set runners.privileged=true"
+echo "helm upgrade --install -f gitlab/values-gke-minimum.yaml gitlab gitlab/gitlab   --timeout 5m   --set global.edition=ce   --set global.hosts.domain=example.com   --set global.hosts.externalIP=$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}')   --set certmanager-issuer.email=me@example.com   --set runners.privileged=true"
 
-helm3 upgrade --install -f values-gke-minimum.yaml gitlab gitlab/gitlab \
+helm upgrade --install -f values-gke-minimum.yaml gitlab gitlab/gitlab \
   --timeout 5m \
   --set global.edition=ce \
   --set global.hosts.domain=$DOMAIN \
