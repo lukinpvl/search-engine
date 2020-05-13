@@ -6,11 +6,11 @@
 
 Платформа: GCP, 2 GKE кластера - инфраструктурный и кластер для приложения.
 
-##### Установка gitlab:
-
 Включить CloudDNS API:
 
 https://console.cloud.google.com/flows/enableapi?apiid=dns
+
+##### Установка gitlab:
 
 - Проиницилизировать gloud:
 ```
