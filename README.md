@@ -8,6 +8,10 @@
 
 ##### Установка gitlab:
 
+Включить CloudDNS API:
+
+https://console.cloud.google.com/flows/enableapi?apiid=dns
+
 - Проиницилизировать gloud:
 ```
  gcloud init
