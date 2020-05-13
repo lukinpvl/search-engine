@@ -6,8 +6,6 @@ ingress:
     nginx.ingress.kubernetes.io/use-regex: "true"
 
   path: /grafana/?(.*)
-  hosts:
-    - monitoring.example.com
 
 datasources: 
   datasources.yaml:

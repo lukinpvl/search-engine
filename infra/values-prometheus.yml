@@ -4,8 +4,6 @@ alertmanager:
     annotations:
       kubernetes.io/ingress.class: nginx
     #   kubernetes.io/tls-acme: 'true'
-    hosts:
-      - alertmanager.example.com
 
 alertmanagerFiles:
   alertmanager.yml:
@@ -26,8 +24,6 @@ server:
     annotations:
       kubernetes.io/ingress.class: nginx
     #   kubernetes.io/tls-acme: 'true'
-    hosts:
-      - monitoring.example.com
 
 serverFiles:
   alerting_rules.yml:
