@@ -16,7 +16,7 @@ echo "gitlab/gke_bootstrap_script.sh up"
 ./gke_bootstrap_script.sh up
 sleep 60
 
-#echo "Creating dns (CloudDNS) zone and Gitlab records"
+echo "Creating dns (CloudDNS) zone and Gitlab records"
 
 gcloud dns managed-zones list | grep se-project-zone || gcloud dns managed-zones create se-project-zone --description= --dns-name=$DOMAIN.
 sleep 60
