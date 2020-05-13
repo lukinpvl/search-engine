@@ -1,2 +1,4 @@
 .kube
 .git
+infra/values-prometheus-ingress.yml
+infra/values-grafana-ingress.yml
