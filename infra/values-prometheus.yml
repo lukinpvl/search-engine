@@ -5,7 +5,7 @@ alertmanager:
       kubernetes.io/ingress.class: nginx
     #   kubernetes.io/tls-acme: 'true'
     hosts:
-      - alertmanager.example.com
+      - alertmanager.$DOMAIN
 
 alertmanagerFiles:
   alertmanager.yml:
@@ -27,7 +27,7 @@ server:
       kubernetes.io/ingress.class: nginx
     #   kubernetes.io/tls-acme: 'true'
     hosts:
-      - monitoring.example.com
+      - monitoring.$DOMAIN
 
 serverFiles:
   alerting_rules.yml:
