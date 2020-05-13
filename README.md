@@ -6,28 +6,39 @@
 
 Платформа: GCP, 2 GKE кластера - инфраструктурный и кластер для приложения.
 
-##### Установка gitlab: 
+##### Установка gitlab:
 
-- Проиницилизировать gloud: 
+- Проиницилизировать gloud:
 ```
  gcloud init
 ```
-- Запустить скрипт настройки кластера и установки gitlab:
+- Изменить переменные при необходимости и запустить скрипт настройки кластера и установки gitlab:
 ```
  infra/gke-gitlab-install.sh
 ```
 
 ##### Установка кластера для приложения:
 
-- Запустить скрипт настройки кластера:
+- Изменить переменные при необходимости и запустить скрипт настройки кластера:
 ```
  infra/gke-se-install.sh
 ```
 
+В процессе выполнения скрипта будет установлен prometheus и grafana.
+
+Для настойки оповещений о alert'ах в slack, необходимо изменить slack_api_url и channel в файле infra/values-prometheus.yml
+
+Для мониторинга приложения подготовлены дашборды для grafana: search-engine-app/monitoring/ 
+
+Prometheus доступен по адресу: http://monitoring.домен/
+
+Grafana доступна по адресу: http://monitoring.домен/grafana
+
+
 ## Подготовка CI/CD
 - Добавить в hosts:
 ```
-echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.se-project.tk"
+echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.домен"
 ```
 - Зайти в Gitlab. Логин: root. Пароль:
 ```
@@ -39,34 +50,35 @@ CI_REGISTRY_USER - логин в https://hub.docker.com/
 CI_REGISTRY_PASSWORD - пароль в https://hub.docker.com/
 ```
 - Создать проекты в Gitlab:
-добавить логин и пароль в ориджин. сделать репы публиынчми
 ```
-cd search-engine-app/ui/ 
+cd search-engine-app/ui/
 git init
-git remote add origin https://gitlab.se-project.tk/имя_вашей_группы/search-engine-ui
+git remote add origin https://gitlab.домен/имя_вашей_группы/search-engine-ui
 git add .
 git commit -m 'init'
 git push origin master
-cd ../crawler/ 
+cd ../crawler/
 git init
-git remote add origin https://gitlab.se-project.tk/имя_вашей_группы/search-engine-crawler
+git remote add origin https://gitlab.домен/имя_вашей_группы/search-engine-crawler
 git add .
 git commit -m 'init'
 git push origin master
-cd ../deploy/ 
+cd ../deploy/
 git init
-git remote add origin https://gitlab.se-project.tk/имя_вашей_группы/search-engine-deploy
+git remote add origin https://gitlab.домен/имя_вашей_группы/search-engine-deploy
 git add .
 git commit -m 'init'
 git push origin master
 ```
+- Сделать проекты публичными
 
-- Добавить кластер Kubernetes в Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html 
+- Добавить кластер Kubernetes в Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 
-- сделать репы публичными 
 
 ## Планы:
-- Добавить мониторинг и логирование
++ Добавить мониторинг
+- Добавить rabbitmq и mongo exporter
+- Добавить логирование
 + Добавить тестирование в деплой
 + Переделать Review (генерация правильных ссылок)
 + Добавить деплой search-engine-deploy в staging и production
@@ -74,8 +86,7 @@ git push origin master
 -? Автоматизировать интеграцию кластера kubernetes в Gitlab?
 -? Настроить работу по сертификатам
 + Добавить prehooks
-- Добавить ChatOps
++ Добавить ChatOps (реализованно в alerting)
 -? Добавить создание инфраструктуры с помощью terraform
 + Причесать скрипт создания инфраструктуры
-
 
