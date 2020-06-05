@@ -40,7 +40,6 @@ Grafana доступна по адресу: http://monitoring.домен/grafana
 
 
 ## Подготовка CI/CD
-- Добавить в hosts:
 ```
 echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.домен"
 ```
