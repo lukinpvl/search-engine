@@ -13,6 +13,7 @@ MACHINE_TYPE=${MACHINE_TYPE-n1-standard-4}
 RBAC_ENABLED=${RBAC_ENABLED-true}
 NUM_NODES=${NUM_NODES-2}
 INT_NETWORK=${INT_NETWORK-default}
+SUBNETWORK=${SUBNETWORK-default}
 PREEMPTIBLE=${PREEMPTIBLE-false}
 EXTRA_CREATE_ARGS=${EXTRA_CREATE_ARGS-""}
 USE_STATIC_IP=${USE_STATIC_IP-false};
@@ -30,12 +31,9 @@ source $SCRIPT_PATH/common.sh;
 
 function bootstrap(){
   set -e
-  validate_required_tools;
+  validate_tools helm gcloud kubectl;
 
-  set +e
-  helm version --short --client | grep -q '^v3\.[0-9]\{1,\}'
-  IS_HELM_3=$?
-  set -e
+  IS_HELM_3=$(check_helm_3)
 
   # Use the default cluster version for the specified zone if not provided
   if [ -z "${CLUSTER_VERSION}" ]; then
@@ -52,6 +50,7 @@ function bootstrap(){
     --node-version $CLUSTER_VERSION --num-nodes $NUM_NODES \
     --enable-ip-alias \
     --network $INT_NETWORK \
+    --subnetwork $SUBNETWORK \
     --project $PROJECT --enable-basic-auth $EXTRA_CREATE_ARGS;
 
   if ${USE_STATIC_IP}; then
@@ -69,16 +68,27 @@ function bootstrap(){
 
   gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project $PROJECT;
 
+  echo "Wait for APIs to be responding"
+  kubectl --namespace=kube-system wait --for=condition=Available --timeout=5m apiservices/v1.
+
   # Create roles for RBAC Helm
-  if $RBAC_ENABLED && [ ! $IS_HELM_3 -eq 0 ]; then
-    status_code=$(curl -L -w '%{http_code}' -o rbac-config.yaml -s "https://gitlab.com/gitlab-org/charts/gitlab/raw/master/doc/installation/examples/rbac-config.yaml");
-    if [ "$status_code" != 200 ]; then
-      echo "Failed to download rbac-config.yaml, status code: $status_code";
-      exit 1;
+  if $RBAC_ENABLED; then
+    kubectl config set-credentials ${CLUSTER_NAME}-admin-user --username=admin --password=$(cluster_admin_password_gke)
+    if [ -z "${ADMIN_USER}" ]; then
+      ADMIN_USER=$(gcloud config list account --format "value(core.account)" 2> /dev/null)
     fi
 
-    kubectl config set-credentials ${CLUSTER_NAME}-admin-user --username=admin --password=$(cluster_admin_password_gke)
-    kubectl --user=${CLUSTER_NAME}-admin-user create -f rbac-config.yaml;
+    kubectl --dry-run --output=yaml create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user $ADMIN_USER 2> /dev/null | kubectl --user=${CLUSTER_NAME}-admin-user apply -f -
+
+    if [ ! $IS_HELM_3 -eq 0 ]; then
+      status_code=$(curl -L -w '%{http_code}' -o rbac-config.yaml -s "https://gitlab.com/gitlab-org/charts/gitlab/raw/master/doc/installation/examples/rbac-config.yaml");
+      if [ "$status_code" != 200 ]; then
+        echo "Failed to download rbac-config.yaml, status code: $status_code";
+        exit 1;
+      fi
+
+      kubectl --user=${CLUSTER_NAME}-admin-user create -f rbac-config.yaml;
+    fi
   fi
 
   echo "Wait for metrics API service"
@@ -87,23 +97,17 @@ function bootstrap(){
 
   echo "Installing helm..."
 
-  if [ $IS_HELM_3 -eq 0 ]; then
-    helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-  else
+  if [ ! $IS_HELM_3 -eq 0 ]; then
     helm init --wait --service-account tiller
   fi
 
-  helm repo update
+  helm repo add bitnami https://charts.bitnami.com/bitnami
 
   if ! ${USE_STATIC_IP}; then
-    if [ $IS_HELM_3 -eq 0 ]; then
-      name_flag=''
-    else
-      name_flag='--name'
-    fi
+    name_flag=$(set_helm_name_flag)
 
-    helm install $name_flag dns --namespace kube-system stable/external-dns \
-      --version '^2.1.2' \
+    helm install $name_flag dns --namespace kube-system bitnami/external-dns \
+      --version '^3.3.1' \
       --set provider=google \
       --set google.project=$PROJECT \
       --set txtOwnerId=$CLUSTER_NAME \
@@ -114,7 +118,7 @@ function bootstrap(){
 
 #Deletes everything created during bootstrap
 function cleanup_gke_resources(){
-  validate_required_tools;
+  validate_tools gcloud;
 
   gcloud container clusters delete -q $CLUSTER_NAME --zone $ZONE --project $PROJECT;
   echo "Deleted $CLUSTER_NAME cluster successfully";
@@ -137,9 +141,6 @@ case $1 in
     ;;
   down)
     cleanup_gke_resources;
-    ;;
-  chaos)
-    $SCRIPT_PATH/kube-monkey.sh;
     ;;
   *)
     echo "Unknown command $1";
