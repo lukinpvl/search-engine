@@ -41,16 +41,16 @@ Grafana URL: http://monitoring.DOMAIN/grafana
 
 ## Preparing CI/CD
 ```
-echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.домен"
+echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.DOMAIN"
 ```
-- Login to the Gitlab. Login: root. Password:
+- Login to the Gitlab. Login: root. Password (use "use-context" to set the current-context to gitlab cluster):
 ```
 kubectl get secret gitlab-gitlab-initial-root-password -ojsonpath='{.data.password}' | base64 --decode ; echo
 ```
 - Create a Gitlab group, add CI/CD variables:
 ```
-CI_REGISTRY_USER - логин в https://hub.docker.com/
-CI_REGISTRY_PASSWORD - пароль в https://hub.docker.com/
+CI_REGISTRY_USER - https://hub.docker.com/ login
+CI_REGISTRY_PASSWORD - https://hub.docker.com/ password
 ```
 - Create Gitlab projects:
 ```
@@ -73,7 +73,6 @@ git add .
 git commit -m 'init'
 git push origin master
 ```
-- 
 
 - Add Kubernetes cluster to Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 
