@@ -1,87 +1,90 @@
 ### Создание процесса непрерывной поставки для приложения с применением Практик CI/CD и быстрой обратной связью
 
-Приложение: https://github.com/express42/search_engine_ui/
+App: https://github.com/express42/search_engine_ui/
 
-## Подготовка инфраструктуры
+## Preparing infrastructure
 
-Платформа: GCP, 2 GKE кластера - инфраструктурный и кластер для приложения.
+Platform: GCP, 2 GKE clusters: an infrastructure and an app cluster.
 
-Включить CloudDNS API:
+Enable CloudDNS API:
 
 https://console.cloud.google.com/flows/enableapi?apiid=dns
 
-##### Установка gitlab:
+##### Installing gitlab:
 
-- Проиницилизировать gloud:
+- Initialize gloud:
 ```
  gcloud init
 ```
-- Изменить переменные при необходимости и запустить скрипт настройки кластера и установки gitlab:
+- Change variables and start the script to deploy a gitlab cluster and install a gitlab app:
 ```
  infra/gke-gitlab-install.sh
 ```
 
-##### Установка кластера для приложения:
+##### Deploy app cluster:
 
-- Изменить переменные при необходимости и запустить скрипт настройки кластера:
+- Change variables and start the script to deploy an app cluster:
 ```
  infra/gke-se-install.sh
 ```
 
-В процессе выполнения скрипта будет установлен prometheus и grafana.
+Prometheus and grafana will be installed during script execution.
 
-Для настойки оповещений о alert'ах в slack, необходимо изменить slack_api_url и channel в файле infra/values-prometheus.yml
+Change "slack_api_url" and "channel" in infra/values-prometheus.yml to sendings alerts to slack.
 
-Для мониторинга приложения подготовлены дашборды для grafana: search-engine-app/monitoring/ 
+Grafana dashboards for app: search-engine-app/monitoring/ 
 
-Prometheus доступен по адресу: http://monitoring.домен/
+Prometheus URL: http://monitoring.DOMAIN/
 
-Grafana доступна по адресу: http://monitoring.домен/grafana
+Grafana URL: http://monitoring.DOMAIN/grafana
 
 
-## Подготовка CI/CD
+## Preparing CI/CD
 ```
 echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.домен"
 ```
-- Зайти в Gitlab. Логин: root. Пароль:
+- Login to the Gitlab. Login: root. Password:
 ```
 kubectl get secret gitlab-gitlab-initial-root-password -ojsonpath='{.data.password}' | base64 --decode ; echo
 ```
-- Создать в Gitlab группу, добавить CI/CD переменные:
+- Create a Gitlab group, add CI/CD variables:
 ```
 CI_REGISTRY_USER - логин в https://hub.docker.com/
 CI_REGISTRY_PASSWORD - пароль в https://hub.docker.com/
 ```
-- Создать проекты в Gitlab:
+- Create Gitlab projects:
 ```
 cd search-engine-app/ui/
 git init
-git remote add origin https://gitlab.домен/имя_вашей_группы/search-engine-ui
+git remote add origin https://gitlab.DOMAIN/YOUR_GROUP_NAME/search-engine-ui
 git add .
 git commit -m 'init'
 git push origin master
 cd ../crawler/
 git init
-git remote add origin https://gitlab.домен/имя_вашей_группы/search-engine-crawler
+git remote add origin https://gitlab.DOMAIN/YOUR_GROUP_NAME/search-engine-crawler
 git add .
 git commit -m 'init'
 git push origin master
 cd ../deploy/
 git init
-git remote add origin https://gitlab.домен/имя_вашей_группы/search-engine-deploy
+git remote add origin https://gitlab.DOMAIN/YOUR_GROUP_NAME/search-engine-deploy
 git add .
 git commit -m 'init'
 git push origin master
 ```
-- Сделать проекты публичными
+- 
 
-- Добавить кластер Kubernetes в Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
+- Add Kubernetes cluster to Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 
 
-## Планы:
-- Добавить rabbitmq и mongo exporter
-- Добавить логирование
-- Автоматизировать интеграцию кластера kubernetes в Gitlab?
-- Настроить работу по сертификатам
-- Добавить создание инфраструктуры с помощью terraform
+## 2do:
+- Add rabbitmq and mongo exporter
+- Add logging
+- Automate GKE cluster and Gitlab integration?
+- Configure TLS
+- Add terraform to deploy infrastructure 
+- Update grafana and prometheus charts (it's depricated now)
 
+## DNS
+https://my.freenom.com/

@@ -6,8 +6,9 @@ export DOMAIN=se-project.tk
 export CLUSTER_NAME=search-engine
 
 
-
+echo "Enable container.googleapis.com"
 gcloud services enable container.googleapis.com
+echo "Create GKE cluster" 
 gcloud container clusters create $CLUSTER_NAME --enable-autoupgrade \
     --enable-ip-alias \
     --enable-legacy-authorization \
@@ -16,7 +17,10 @@ gcloud container clusters create $CLUSTER_NAME --enable-autoupgrade \
 gcloud container clusters get-credentials $CLUSTER_NAME
 
 
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+
+echo "Install nginx-ingress Helm chart"
 helm install nginx-ingress stable/nginx-ingress --set rbac.create=true --set controller.publishService.enabled=true
 
 
@@ -29,6 +33,8 @@ gcloud dns record-sets list --zone=se-project-zone | grep production.$DOMAIN || 
 gcloud dns record-sets list --zone=se-project-zone | grep test.$DOMAIN || gcloud dns record-sets transaction add $(kubectl get services | grep 'nginx-ingress-controller' | awk '{print $4}') --name=test.$DOMAIN. --ttl=300 --type=A --zone=se-project-zone
 gcloud dns record-sets list --zone=se-project-zone | grep monitoring.$DOMAIN || gcloud dns record-sets transaction add $(kubectl get services | grep 'nginx-ingress-controller' | awk '{print $4}') --name=monitoring.$DOMAIN. --ttl=300 --type=A --zone=se-project-zone
 gcloud dns record-sets transaction execute --zone=se-project-zone
+
+cd infra
 
 echo "alertmanager:
   ingress:
