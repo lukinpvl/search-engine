@@ -134,6 +134,7 @@ production:
   function install_tiller() {
     echo "Checking Tiller..."
     helm init --upgrade
+    echo "@#!&@!#!@*#&@!*(#@!#!@&#&!@*&#!(@&#(*@!&#(*!&ASYDAISUDHASLDHASD"
     kubectl rollout status -n "$TILLER_NAMESPACE" -w "deployment/tiller-deploy"
     if ! helm version --debug; then
       echo "Failed to init Tiller."
