@@ -83,7 +83,7 @@ git push origin master
 - Automate GKE cluster and Gitlab integration?
 - Configure TLS
 - Add terraform to deploy infrastructure 
-- Update grafana and prometheus charts (it's depricated now)
+- Update grafana and prometheus charts (they're depricated now)
 
 ## DNS
 https://my.freenom.com/
