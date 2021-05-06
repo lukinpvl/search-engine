@@ -85,7 +85,6 @@ production:
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY/$CI_PROJECT_PATH
   export CI_APPLICATION_TAG=$CI_COMMIT_REF_SLUG
   export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
-  export TILLER_NAMESPACE="kube-system"
 
   function deploy() {
     echo $KUBE_NAMESPACE
@@ -97,8 +96,8 @@ production:
     helm upgrade --install \
       --wait \
       --set search-engine-ui.ingress.host="$KUBE_NAMESPACE.se-project.tk" \
-      --set earch-engine-ui.image.tag="$(curl https://gitlab.se-project.tk/$CI_PROJECT_NAMESPACE/search-engine-ui/raw/master/VERSION)" \
-      --set earch-engine-crawler.image.tag="$(curl https://gitlab.se-project.tk/$CI_PROJECT_NAMESPACE/search-engine-crawler/raw/master/VERSION)" \
+      --set search-engine-ui.image.tag="$(curl https://gitlab.se-project.tk/$CI_PROJECT_NAMESPACE/search-engine-ui/raw/master/VERSION)" \
+      --set search-engine-crawler.image.tag="$(curl https://gitlab.se-project.tk/$CI_PROJECT_NAMESPACE/search-engine-crawler/raw/master/VERSION)" \
       --namespace="$KUBE_NAMESPACE" \
       --version="$CI_PIPELINE_ID-$CI_JOB_ID" \
       "$name" \
@@ -117,9 +116,6 @@ production:
     chmod 700 get_helm.sh
     ./get_helm.sh
     helm version
-
-    mv linux-amd64/helm /usr/bin/
-    helm version --client
 
     curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     chmod +x /usr/bin/kubectl
