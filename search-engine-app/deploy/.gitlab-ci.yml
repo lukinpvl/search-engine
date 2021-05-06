@@ -133,7 +133,7 @@ production:
   function delete() {
    # track="${1-stable}"
    # name="$CI_ENVIRONMENT_SLUG"
-    helm delete "$name" --purge
+    helm delete "$name"
    # || true
   }
 
