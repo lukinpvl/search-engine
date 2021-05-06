@@ -132,8 +132,8 @@ production:
 
   function delete() {
    # track="${1-stable}"
-   # name="$CI_ENVIRONMENT_SLUG"
-    helm delete "$name"
+    name="$CI_ENVIRONMENT_SLUG"
+    helm delete "$name" -n "$KUBE_NAMESPACE"
    # || true
   }
 
