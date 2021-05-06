@@ -47,7 +47,6 @@ test:
   variables:
     KUBE_NAMESPACE: test
     host: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
-    TILLER_NAMESPACE: kube-system
     CI_APPLICATION_TAG: $CI_COMMIT_REF_SLUG
     name: $CI_ENVIRONMENT_SLUG
   environment:
@@ -79,15 +78,6 @@ test:
     # ensuring namespace
     - kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
 
-    # installing Tiller
-    - echo "Checking Tiller..."
-    - helm init --force-upgrade
-    - kubectl rollout status -n "$TILLER_NAMESPACE" -w "deployment/tiller-deploy"
-    - >
-      if ! helm version --debug; then
-        echo "Failed to init Tiller."
-        exit 1
-      fi
   script:
     - export track="${1-stable}"
     - >
@@ -113,7 +103,7 @@ test:
         search-engine-deploy/search-engine/
     - kubectl exec --namespace $KUBE_NAMESPACE $(kubectl get pods --namespace $KUBE_NAMESPACE | grep $name-$CI_PROJECT_NAME | awk '{print $1}') -- /bin/sh -c 'cd /app && pip install -r requirements-test.txt &&  python -m unittest discover -s tests/'
   after_script:
-    - helm delete "$name" --purge
+    - helm delete "$name" -n "$KUBE_NAMESPACE"
     - helm ls
 
 release:
@@ -155,7 +145,6 @@ review:
   variables:
     KUBE_NAMESPACE: review
     host: $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG
-    TILLER_NAMESPACE: kube-system
     CI_APPLICATION_TAG: $CI_COMMIT_REF_SLUG
     name: $CI_ENVIRONMENT_SLUG
   environment:
@@ -176,9 +165,10 @@ review:
     - apk add glibc-2.23-r3.apk
     - curl https://storage.googleapis.com/pub/gsutil.tar.gz | tar -xz -C $HOME
     - export PATH=${PATH}:$HOME/gsutil
-    - curl https://kubernetes-helm.storage.googleapis.com/helm-v2.13.1-linux-amd64.tar.gz | tar zx
-    - mv linux-amd64/helm /usr/bin/
-    - helm version --client
+    - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+    - chmod 700 get_helm.sh
+    - ./get_helm.sh
+    - helm version
     - curl  -o /usr/bin/sync-repo.sh https://raw.githubusercontent.com/kubernetes/helm/master/scripts/sync-repo.sh
     - chmod a+x /usr/bin/sync-repo.sh
     - curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
@@ -187,15 +177,6 @@ review:
     # ensuring namespace
     - kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
 
-    # installing Tiller
-    - echo "Checking Tiller..."
-    - helm init --force-upgrade
-    - kubectl rollout status -n "$TILLER_NAMESPACE" -w "deployment/tiller-deploy"
-    - >
-      if ! helm version --debug; then
-        echo "Failed to init Tiller."
-        exit 1
-      fi
   script:
     - export track="${1-stable}"
     - >
@@ -224,6 +205,7 @@ stop_review:
   stage: cleanup
   variables:
     GIT_STRATEGY: none
+    KUBE_NAMESPACE: review
     name: $CI_ENVIRONMENT_SLUG
   environment:
     name: review/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME
@@ -244,13 +226,15 @@ stop_review:
     - apk add glibc-2.23-r3.apk
     - curl https://storage.googleapis.com/pub/gsutil.tar.gz | tar -xz -C $HOME
     - export PATH=${PATH}:$HOME/gsutil
-    - curl https://kubernetes-helm.storage.googleapis.com/helm-v2.13.1-linux-amd64.tar.gz | tar zx
-    - mv linux-amd64/helm /usr/bin/
-    - helm version --client
+    - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+    - chmod 700 get_helm.sh
+    - ./get_helm.sh
+    - helm version
     - curl  -o /usr/bin/sync-repo.sh https://raw.githubusercontent.com/kubernetes/helm/master/scripts/sync-repo.sh
     - chmod a+x /usr/bin/sync-repo.sh
     - curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x /usr/bin/kubectl
     - kubectl version --client
   script:
-    - helm delete "$name" --purge
+    - helm delete "$name" -n "$KUBE_NAMESPACE"
+
