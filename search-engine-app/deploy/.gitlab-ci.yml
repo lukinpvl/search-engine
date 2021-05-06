@@ -11,7 +11,6 @@ test:
   script:
   - install_dependencies
   - ensure_namespace
-  - install_tiller
   - deploy
   - sleep 60
   - if [ $(curl -s -o /dev/null -I -w "%{http_code}" http://test.se-project.tk/) != 200 ]; then exit 1; fi
@@ -32,7 +31,6 @@ stop_test:
   script:
   - install_dependencies
   - ensure_namespace
-  - install_tiller
   - delete
   variables:
     KUBE_NAMESPACE: test
@@ -52,7 +50,6 @@ staging:
   script:
   - install_dependencies
   - ensure_namespace
-  - install_tiller
   - deploy
   variables:
     KUBE_NAMESPACE: staging
@@ -70,7 +67,6 @@ production:
   script:
     - install_dependencies
     - ensure_namespace
-    - install_tiller
     - deploy
   variables:
     KUBE_NAMESPACE: production
@@ -117,7 +113,10 @@ production:
     apk add glibc-2.23-r3.apk
     rm glibc-2.23-r3.apk
 
-    curl https://kubernetes-helm.storage.googleapis.com/helm-v2.13.1-linux-amd64.tar.gz | tar zx
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+    chmod 700 get_helm.sh
+    ./get_helm.sh
+    helm version
 
     mv linux-amd64/helm /usr/bin/
     helm version --client
@@ -129,17 +128,6 @@ production:
 
   function ensure_namespace() {
     kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
-  }
-
-  function install_tiller() {
-    echo "Checking Tiller..."
-    helm init --upgrade
-    kubectl rollout status -n "$TILLER_NAMESPACE" -w "deployment/tiller-deploy"
-    if ! helm version --debug; then
-      echo "Failed to init Tiller."
-      return 1
-    fi
-    echo ""
   }
 
   function delete() {
