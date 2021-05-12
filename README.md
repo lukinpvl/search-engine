@@ -28,7 +28,7 @@ https://console.cloud.google.com/flows/enableapi?apiid=dns
  infra/gke-se-install.sh
 ```
 
-Prometheus and grafana will be installed during script execution.
+Prometheus and grafana will be installed during the script execution.
 
 Change "slack_api_url" and "channel" in infra/values-prometheus.yml to sending alerts to slack.
 
