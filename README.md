@@ -43,7 +43,7 @@ Grafana URL: http://monitoring.DOMAIN/grafana
 ```
 echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.DOMAIN"
 ```
-- Login to the Gitlab. Login: root. Password (use "use-context" to set the current-context to gitlab cluster):
+- Login to Gitlab. Login: root. Password (use "use-context" to set the current-context to gitlab cluster):
 ```
 kubectl get secret gitlab-gitlab-initial-root-password -ojsonpath='{.data.password}' | base64 --decode ; echo
 ```
