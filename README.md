@@ -16,7 +16,7 @@ https://console.cloud.google.com/flows/enableapi?apiid=dns
 ```
  gcloud init
 ```
-- Change variables and start the script to deploy a gitlab cluster and install a gitlab app:
+- Change variables and start the script to deploy a Gitlab cluster and install a Gitlab app:
 ```
  infra/gke-gitlab-install.sh
 ```
@@ -43,7 +43,7 @@ Grafana URL: http://monitoring.DOMAIN/grafana
 ```
 echo "$(gcloud compute addresses list | grep 'gitlab-cluster-external-ip' | awk '{print $2}') gitlab.DOMAIN"
 ```
-- Login to Gitlab. Login: root. Password (use "use-context" to set the current-context to gitlab cluster):
+- Login to Gitlab. Login: root. Password (use "use-context" to set the current-context to the Gitlab cluster):
 ```
 kubectl get secret gitlab-gitlab-initial-root-password -ojsonpath='{.data.password}' | base64 --decode ; echo
 ```
@@ -74,7 +74,7 @@ git commit -m 'init'
 git push origin master
 ```
 
-- Add Kubernetes cluster to Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
+- Add the Kubernetes cluster to Gitlab: https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html
 
 
 ## 2do:
