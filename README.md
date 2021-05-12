@@ -4,7 +4,7 @@ App: https://github.com/express42/search_engine_ui/
 
 ## Preparing infrastructure
 
-Platform: GCP, 2 GKE clusters: an infrastructure and an app cluster.
+Platform: GCP, 2 GKE clusters: infrastructure and an app cluster.
 
 Enable CloudDNS API:
 
@@ -12,7 +12,7 @@ https://console.cloud.google.com/flows/enableapi?apiid=dns
 
 ##### Installing gitlab:
 
-- Initialize gloud:
+- Initialize gcloud:
 ```
  gcloud init
 ```
@@ -21,7 +21,7 @@ https://console.cloud.google.com/flows/enableapi?apiid=dns
  infra/gke-gitlab-install.sh
 ```
 
-##### Deploy app cluster:
+##### Deploying app cluster:
 
 - Change variables and start the script to deploy an app cluster:
 ```
@@ -30,7 +30,7 @@ https://console.cloud.google.com/flows/enableapi?apiid=dns
 
 Prometheus and grafana will be installed during script execution.
 
-Change "slack_api_url" and "channel" in infra/values-prometheus.yml to sendings alerts to slack.
+Change "slack_api_url" and "channel" in infra/values-prometheus.yml to sending alerts to slack.
 
 Grafana dashboards for app: search-engine-app/monitoring/ 
 
@@ -83,7 +83,7 @@ git push origin master
 - Automate GKE cluster and Gitlab integration?
 - Configure TLS
 - Add terraform to deploy infrastructure 
-- Update grafana and prometheus charts (they're depricated now)
+- Update grafana and prometheus charts (they're deprecated now)
 
 ## DNS
 https://my.freenom.com/
